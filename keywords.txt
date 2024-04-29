@@ -6,7 +6,7 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-ConnectWifi	KEYWORD1
+ConnectGateway	KEYWORD1
 
 #######################################
 # Methods (KEYWORD2)
@@ -14,4 +14,5 @@ ConnectWifi	KEYWORD1
 
 begin KEYWORD2
 isConnected KEYWORD2
-getIp KEYWORD2
+disconnect KEYWORD2
+getGatewayIp KEYWORD2
