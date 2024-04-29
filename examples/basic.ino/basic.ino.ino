@@ -13,7 +13,7 @@ void setup() {
 void loop() {
   if(connect.isConnected()){
     if(connectGateway.isConnected()){
-      Serial.printf("Connected:",connectGateway.getGatewayIp().toString().c_str());
+      Serial.printf("Connected:%s\n",connectGateway.getGatewayIp().toString().c_str());
       delay(10000);
     }
   }

@@ -2,8 +2,7 @@
 #define ConnectGateway_h
 
 #include <Arduino.h>
-#include <WiFi.h>
-#include "AsyncUDP_RP2040W.h"
+#include <WiFiUdp.h>
 
 #define JSON_BUFFER_SIZE 256
 #define DEFAULT_GATEWAY_NAME    "gateway"
@@ -19,13 +18,14 @@ public:
     void disconnect();
     IPAddress getGatewayIp();
 private:
-    static IPAddress _gateway_ip;
-    static AsyncUDP* udp;
-    bool _connected = false;
-    static char _gatewayName[32];
-    static char _deviceName[32];
-    uint16_t _connect_port;
-    unsigned long _lastCheck = 0;
+    IPAddress gateway_ip;
+    WiFiUDP udp;
+    bool connected = false;
+    bool sent = false;
+    char gatewayName[32];
+    char deviceName[32];
+    uint16_t connect_port;
+    unsigned long lastCheck = 0;
 };
 
 #endif

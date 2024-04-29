@@ -1,9 +1,9 @@
 #include "ConnectGateway.h"
 
-ConnectGateway::ConnectGateway(const char* gatewayName,const char* deviceName,uint16_t port){
-  strcpy(_gatewayName,gatewayName);
-  strcpy(_deviceName,deviceName);
-  _connect_port = port;
+ConnectGateway::ConnectGateway(const char* _gatewayName,const char* _deviceName,uint16_t port){
+  strcpy(gatewayName,_gatewayName);
+  strcpy(deviceName,_deviceName);
+  connect_port = port;
 }
 
 
@@ -12,22 +12,9 @@ bool ConnectGateway::begin(){
     return false;
   }
 
-  if(!udp){
-    udp = new AsyncUDP();
-  }
+  udp.begin(connect_port);
 
-  if(udp->listen(_connect_port)){
-    Serial.println("UDP connected");
-
-    udp->onPacket([](AsyncUDPPacket packet)
-    {
-      if (memcmp((char*)packet.data(),_gatewayName,strlen(_gatewayName)) == 0){
-        _gateway_ip = packet.remoteIP();
-      }
-    });
-  }
-
-  _lastCheck = millis();
+  lastCheck = millis();
 
   return true;
 }
@@ -35,20 +22,36 @@ bool ConnectGateway::begin(){
 bool ConnectGateway::isConnected(){
   char  message[256];
 
-  if (millis() - _lastCheck > CHACK_INTERVAL_MS){  
-    if (!_connected){
-      sprintf(message,"{\"gateway\":\"%s\",\"device\":\"%s\"}",_gatewayName,_deviceName);
-      udp->broadcastTo(message,_connect_port);
+  if (millis() - lastCheck > CHACK_INTERVAL_MS){  
+    if (!connected){
+      if (!sent){
+        sprintf(message,"{\"gateway\":\"%s\",\"device\":\"%s\"}",gatewayName,deviceName);
+        udp.beginPacket(IPAddress(255,255,255,255), connect_port);
+        udp.write(message);
+        udp.endPacket();
+        sent = true;
+      }else{
+        int packetSize = udp.parsePacket();
+        if (packetSize) {
+          int n = udp.read(message, 256);
+          message[n] = 0;
+          if (strcmp(message,gatewayName) == 0){
+            gateway_ip = udp.remoteIP();
+            connected = true;
+          }
+        }
+        sent = false;
+      }
     }
-    _lastCheck = millis();
+    lastCheck = millis();
   }
-  return _connected;
+  return connected;
 }
 
 void ConnectGateway::disconnect(){
-  _connected = false;
+  connected = false;
 }
 
 IPAddress ConnectGateway::getGatewayIp(){
-  return isConnected() ? _gateway_ip : IPAddress(0,0,0,0);
+  return isConnected() ? gateway_ip : IPAddress(0,0,0,0);
 }
