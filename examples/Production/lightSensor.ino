@@ -1,16 +1,23 @@
 #include <WiFi.h>
-#include "ConnectWifi.h"
 #include "ConnectGateway.h"
 
-ConnectWifi connect;
-ConnectGateway connectGateway("gateway","light");
+const char* ssid     = "ssid";
+const char* password = "password";
+
+const char* gatewayName = "gateway";
+const char* locateName = "リビング";
+const char* deviceName = "light";
+
+ConnectGateway connectGateway(gatewayName,locateName,deviceName);
 WiFiClient client;
 const int lightSensorPin = A2;
 const int lightSensorThreshold = 500;
 
 void setup() {
   Serial.begin(115200);
-  connect.begin();
+
+  WiFi.begin(ssid, password);
+
   connectGateway.begin();
 }
 
@@ -26,9 +33,8 @@ bool getLight(){
 }
 
 void loop() {
-  if(connect.isConnected()){
+  if(WiFi.status() == WL_CONNECTED){
     if(connectGateway.isConnected()){
-      Serial.printf("Connected:%s\n",connectGateway.getGatewayIp().toString().c_str());
       if (!client.connect(connectGateway.getGatewayIp(), 61000)) {
         connectGateway.disconnect();
       }
