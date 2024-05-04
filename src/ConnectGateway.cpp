@@ -1,7 +1,13 @@
 #include "ConnectGateway.h"
 
-ConnectGateway::ConnectGateway(const char* _gatewayName,const char* _deviceName,uint16_t port){
+ConnectGateway::ConnectGateway(
+  const char* _gatewayName,
+  const char* _locationName,
+  const char* _deviceName,
+  uint16_t port
+  ){
   strcpy(gatewayName,_gatewayName);
+  strcpy(locationName,_locationName);
   strcpy(deviceName,_deviceName);
   connect_port = port;
 }
@@ -25,7 +31,7 @@ bool ConnectGateway::isConnected(){
   if (millis() - lastCheck > CHACK_INTERVAL_MS){  
     if (!connected){
       if (!sent){
-        sprintf(message,"{\"gateway\":\"%s\",\"device\":\"%s\"}",gatewayName,deviceName);
+        sprintf(message,"{\"gateway\":\"%s\",\"location\":\"%s\",\"device\":\"%s\"}",gatewayName,locationName,deviceName);
         udp.beginPacket(IPAddress(255,255,255,255), connect_port);
         udp.write(message);
         udp.endPacket();
